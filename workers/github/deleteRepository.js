@@ -1,37 +1,42 @@
-const { client, Variables } = require('../../clients/camunda');
+const { Variables, logger } = require('camunda-external-task-client-js');
+
 const github = require('../../clients/github');
 
 const topic = 'github-delete-repository';
-client.subscribe(topic, async function({ task, taskService }) {
-    console.log(`[${topic}] task ${task.id}`);
 
-    const org_id = task.variables.get('github_organization_id');
-    const repo = task.variables.get('github_repository_name');
+module.exports = {
+    topic: topic,
+    callback: async function({ task, taskService }) {
+        console.log(`[${topic}] task ${task.id}`);
 
-    const processVariables = new Variables();
-    try {
-        const response = await github.delete(`/repos/${org_id}/${repo}`);
+        const org_id = task.variables.get('github_organization_id');
+        const repo = task.variables.get('github_repository_name');
 
-        processVariables.setAll({
-            repository_deleted: true,
-        });
+        const processVariables = new Variables();
+        try {
+            const response = await github.delete(`/repos/${org_id}/${repo}`);
 
-        await taskService.complete(task, processVariables, processVariables);
-    } catch (e) {
-        const response = e.response;
-        if (response) {
-            const responseData = response.data;
-            console.error(responseData);
-            await taskService.handleFailure(task, {
-                errorMessage: responseData.message || 'GitHub API unknown error',
-                errorDetails: JSON.stringify(responseData),
+            processVariables.setAll({
+                repository_deleted: true,
             });
-        } else {
-            console.error(e);
-            await taskService.handleFailure(task, {
-                errorMessage: 'Server unknown error',
-                errorDetails: e.toString(),
-            });
+
+            await taskService.complete(task, processVariables, processVariables);
+        } catch (e) {
+            const response = e.response;
+            if (response) {
+                const responseData = response.data;
+                console.error(responseData);
+                await taskService.handleFailure(task, {
+                    errorMessage: responseData.message || 'GitHub API unknown error',
+                    errorDetails: JSON.stringify(responseData),
+                });
+            } else {
+                console.error(e);
+                await taskService.handleFailure(task, {
+                    errorMessage: 'Server unknown error',
+                    errorDetails: e.toString(),
+                });
+            }
         }
-    }
-});
+    },
+};
