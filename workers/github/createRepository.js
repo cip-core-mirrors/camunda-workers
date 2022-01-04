@@ -19,7 +19,7 @@ module.exports = {
                 name: repo,
             };
 
-            console.log(`[${topic}] POST ${url}\n${body}`);
+            console.log(`[${topic}] POST ${url}\n${JSON.stringify(body)}`);
             const response = await github.post(url, body);
 
             processVariables.setAll({

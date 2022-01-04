@@ -21,7 +21,7 @@ module.exports = {
                 permission: permission,
             };
 
-            console.log(`[${topic}] PUT ${url}\n${body}`);
+            console.log(`[${topic}] PUT ${url}\n${JSON.stringify(body)}`);
             await github.put(url, body);
 
             await taskService.complete(task, processVariables, processVariables);
