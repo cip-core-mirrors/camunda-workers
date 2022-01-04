@@ -2,7 +2,7 @@ const { Variables, logger } = require('camunda-external-task-client-js');
 
 const github = require('../../clients/github');
 
-const topic = 'github-create-repository';
+const topic = 'github-add-collaborator';
 
 module.exports = {
     topic: topic,
