@@ -16,6 +16,7 @@ module.exports = {
         });
 
         try {
+            console.log(`[${topic}] GET ${url}`);
             const response = await axios.get(url, {
                 headers: {
                     authorization: `Bearer ${accessToken}`,

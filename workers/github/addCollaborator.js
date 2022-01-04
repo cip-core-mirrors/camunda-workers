@@ -16,9 +16,13 @@ module.exports = {
 
         const processVariables = new Variables();
         try {
-            await github.put(`/repos/${org_id}/${repo}/collaborators/${username}`, {
+            const url = `/repos/${org_id}/${repo}/collaborators/${username}`;
+            const body = {
                 permission: permission,
-            });
+            };
+
+            console.log(`[${topic}] PUT ${url}\n${body}`);
+            await github.put(url, body);
 
             await taskService.complete(task, processVariables, processVariables);
         } catch (e) {

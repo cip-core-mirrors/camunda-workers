@@ -14,7 +14,10 @@ module.exports = {
 
         const processVariables = new Variables();
         try {
-            const response = await github.get(`/repos/${org_id}/${repo}`);
+            const url = `/repos/${org_id}/${repo}`;
+
+            console.log(`[${topic}] GET ${url}`);
+            const response = await github.get(url);
             processVariables.setAll({
                 repository_exists: true,
                 github_repository: response.data,

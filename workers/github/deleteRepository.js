@@ -14,7 +14,10 @@ module.exports = {
 
         const processVariables = new Variables();
         try {
-            const response = await github.delete(`/repos/${org_id}/${repo}`);
+            const url = `/repos/${org_id}/${repo}`;
+
+            console.log(`[${topic}] DELETE ${url}`);
+            const response = await github.delete(url);
 
             processVariables.setAll({
                 repository_deleted: true,

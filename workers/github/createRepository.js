@@ -14,9 +14,13 @@ module.exports = {
 
         const processVariables = new Variables();
         try {
-            const response = await github.post(`/orgs/${org_id}/repos`, {
+            const url = `/orgs/${org_id}/repos`;
+            const body = {
                 name: repo,
-            });
+            };
+
+            console.log(`[${topic}] POST ${url}\n${body}`);
+            const response = await github.post(url, body);
 
             processVariables.setAll({
                 repository_created: true,
