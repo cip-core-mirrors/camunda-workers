@@ -2,7 +2,7 @@ const { Variables, logger } = require('camunda-external-task-client-js');
 
 const openshift = require('../../../clients/openshift');
 
-const topic = 'openshift-create-group';
+const topic = 'openshift-check-group';
 
 module.exports = {
     topic: topic,
@@ -10,33 +10,17 @@ module.exports = {
         console.log(`[${topic}] task ${task.id}`);
 
         const name = task.variables.get('openshift_group_name');
-        const users = task.variables.get('openshift_username');
+        const processVariables = new Variables();
         try {
-            const url = `/apis/user.openshift.io/v1/groups`;
-            const body = {
-                kind: "Group",
-                apiVersion: "user.openshift.io/v1",
-                metadata: {
-                    name: name,
-                    labels: {
-                        "openshift.io/ldap.host": "ldap.cip-ldap-common.svc.cluster.local",
-                    },
-                    annotations: {
-                        "openshift.io/ldap.uid": `cn=${name},ou=groups,ou=dev,ou=iam,dc=sgcip,dc=com`,
-                        "openshift.io/ldap.url": "ldap.cip-ldap-common.svc.cluster.local:389",
-                    },
-                },
-                users: [users],
-            };
+            const url = `/apis/user.openshift.io/v1/groups/${name}`;
 
-            console.log(`[${topic}] POST ${url}\n${JSON.stringify(body)}`);
-            const response = await openshift.post(url, body);
+            console.log(`[${topic}] GET ${url}`);
+            const response = await openshift.get(url);
 
             console.log(response.data)
 
-            const processVariables = new Variables();
             processVariables.setAll({
-                group_created: true,
+                group_exists: true,
                 openshift_group: response.data,
             });
 
@@ -44,6 +28,13 @@ module.exports = {
         } catch (e) {
             const response = e.response;
             if (response) {
+                if (response.status === 404) {
+                    processVariables.setAll({
+                        group_exists: false,
+                    });
+                    return await taskService.complete(task, processVariables, processVariables);
+                }
+
                 const responseData = response.data;
                 console.error(responseData);
                 await taskService.handleFailure(task, {
