@@ -14,33 +14,15 @@ module.exports = {
         const username = task.variables.get('github_username');
         const permission = task.variables.get('github_repo_permission');
 
+        const url = `/repos/${org_id}/${repo}/collaborators/${username}`;
+        const body = {
+            permission: permission,
+        };
+
+        console.log(`[${topic}] PUT ${url}\n${JSON.stringify(body)}`);
+        await github.put(url, body);
+
         const processVariables = new Variables();
-        try {
-            const url = `/repos/${org_id}/${repo}/collaborators/${username}`;
-            const body = {
-                permission: permission,
-            };
-
-            console.log(`[${topic}] PUT ${url}\n${JSON.stringify(body)}`);
-            await github.put(url, body);
-
-            await taskService.complete(task, processVariables, processVariables);
-        } catch (e) {
-            const response = e.response;
-            if (response) {
-                const responseData = response.data;
-                console.error(responseData);
-                await taskService.handleFailure(task, {
-                    errorMessage: responseData.message || 'GitHub API unknown error',
-                    errorDetails: JSON.stringify(responseData),
-                });
-            } else {
-                console.error(e);
-                await taskService.handleFailure(task, {
-                    errorMessage: 'Server unknown error',
-                    errorDetails: e.toString(),
-                });
-            }
-        }
+        await taskService.complete(task, processVariables, processVariables);
     },
 };

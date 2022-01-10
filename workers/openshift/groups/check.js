@@ -34,20 +34,9 @@ module.exports = {
                     });
                     return await taskService.complete(task, processVariables, processVariables);
                 }
-
-                const responseData = response.data;
-                console.error(responseData);
-                await taskService.handleFailure(task, {
-                    errorMessage: responseData.message || 'API unknown error',
-                    errorDetails: JSON.stringify(responseData),
-                });
-            } else {
-                console.error(e);
-                await taskService.handleFailure(task, {
-                    errorMessage: 'Server unknown error',
-                    errorDetails: e.toString(),
-                });
             }
+
+            throw e;
         }
     },
 };

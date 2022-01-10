@@ -15,26 +15,19 @@ module.exports = {
             errorMessage: "no access token provided",
         });
 
-        try {
-            console.log(`[${topic}] GET ${url}`);
-            const response = await axios.get(url, {
-                headers: {
-                    authorization: `Bearer ${accessToken}`,
-                },
-            });
-            const processVariables = new Variables();
-            processVariables.setAll({
-                keycloak_authenticated: 'true',
-                keycloak_userinfo: response.data,
-            });
+        console.log(`[${topic}] GET ${url}`);
+        const response = await axios.get(url, {
+            headers: {
+                authorization: `Bearer ${accessToken}`,
+            },
+        });
 
-            await taskService.complete(task, processVariables, processVariables);
-        } catch (e) {
-            const errorResponse = e.response.data;
-            console.error(errorResponse);
-            await taskService.handleFailure(task, {
-                errorMessage: errorResponse.error_description,
-            });
-        }
+        const processVariables = new Variables();
+        processVariables.setAll({
+            keycloak_authenticated: 'true',
+            keycloak_userinfo: response.data,
+        });
+
+        await taskService.complete(task, processVariables, processVariables);
     },
 };
