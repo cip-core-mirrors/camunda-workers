@@ -2,7 +2,7 @@ const { Variables, logger } = require('camunda-external-task-client-js');
 
 const openshift = require('../../../clients/openshift');
 
-const topic = 'openshift-delete-group';
+const topic = 'openshift-grant-group';
 
 module.exports = {
     topic: topic,
@@ -20,28 +20,25 @@ module.exports = {
             response = await openshift.get(url);
         } catch (e) {
             return await taskService.handleFailure(task, {
-                errorMessage: 'Group delete error',
+                errorMessage: 'Group grant error',
                 errorDetails: 'Group does not exist',
             });
         }
 
         if (response) {
             const group = response.data;
-            if (group.users.indexOf(user) !== -1) {
-                console.log(`[${topic}] DELETE ${url}`);
-                await openshift.delete(url);
-                processVariables.setAll({
-                    group_deleted: true,
-                });
-            } else {
-                return await taskService.handleFailure(task, {
-                    errorMessage: 'Group delete error',
-                    errorDetails: 'Not member of this group',
-                });
+            if (group.users.indexOf(user) === -1) {
+                group.users.push(user);
+                console.log(`[${topic}] PUT ${url}`);
+                await openshift.put(url, group);
             }
+
+            processVariables.setAll({
+                group_granted: true,
+            });
         } else {
             return await taskService.handleFailure(task, {
-                errorMessage: 'Group delete error',
+                errorMessage: 'Group grant error',
                 errorDetails: 'API response error',
             });
         }
