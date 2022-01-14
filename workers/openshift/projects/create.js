@@ -32,8 +32,7 @@ module.exports = {
 
         console.log(`[${topic}] POST ${url}\n${JSON.stringify(body)}`);
         const response = await openshift.post(url, body);
-
-        console.log(response.data)
+        console.log(response.data);
 
         const processVariables = new Variables();
         processVariables.setAll({
