@@ -46,3 +46,7 @@ module.exports = {
 ```
 
 [Full documentation](https://github.com/camunda/camunda-external-task-client-js#features) of `task` and `taskService` variables
+
+## 3. Workers lifecycle
+
+![Diagram](/docs/Diagram.png?raw=true)
